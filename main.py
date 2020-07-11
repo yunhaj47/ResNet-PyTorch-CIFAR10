@@ -113,7 +113,7 @@ def check_accuracy(model, loader):
 
         num_correct += (preds == y).sum()
         num_samples += preds.size(0)
-    print('socres size is {}, preds size is {}, y size is {}'.format(scores.size, preds.size, y.size))
+    print('socres size is {}, preds size is {}, y size is {}'.format(list(scores.size()), list(preds.size()), list(y.size())))
     acc = float(num_correct) / num_samples
     print('Got %d / %d correct (%.2f)' % (num_correct, num_samples, 100 * acc))
 
