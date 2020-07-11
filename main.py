@@ -48,7 +48,7 @@ def main(args):
     cifar10_train = dset.CIFAR10('./dataset', train=True, download=True,
                                  transform=T.Compose([transform_augment, transform_normalize]))
     # test
-    print(type(cifar10_train))
+    print('The format of the cifar10_train is {}'.format(type(cifar10_train)))
     loader_train = DataLoader(cifar10_train, batch_size=args.batch_size,
                               sampler=ChunkSampler(NUM_TRAIN))
     cifar10_val = dset.CIFAR10('./dataset', train=True, download=True,
