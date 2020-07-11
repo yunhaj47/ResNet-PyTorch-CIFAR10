@@ -47,6 +47,8 @@ def main(args):
     NUM_VAL = 5000
     cifar10_train = dset.CIFAR10('./dataset', train=True, download=True,
                                  transform=T.Compose([transform_augment, transform_normalize]))
+    # test
+    print(type(cifar10_train))
     loader_train = DataLoader(cifar10_train, batch_size=args.batch_size,
                               sampler=ChunkSampler(NUM_TRAIN))
     cifar10_val = dset.CIFAR10('./dataset', train=True, download=True,
@@ -77,7 +79,7 @@ def main(args):
     # train model
     SCHEDULE_EPOCHS = [50, 5, 5] # divide lr by 10 after each number of epochs
 #     SCHEDULE_EPOCHS = [100, 50, 50] # divide lr by 10 after each number of epochs
-    learning_rate = 0.1
+    learning_rate = 0.1 # initial learning rate
     for num_epochs in SCHEDULE_EPOCHS:
         print('Training for %d epochs with learning rate %f' % (num_epochs, learning_rate))
         optimizer = optim.SGD(model.parameters(), lr=learning_rate,
@@ -108,20 +110,21 @@ def check_accuracy(model, loader):
         scores = model(X_var)
         _, preds = scores.data.cpu().max(1)
         # test
-        print('socres size is {}, preds size is {}, y size is {}'.format(scores.size, preds.size, y.size))
 
         num_correct += (preds == y).sum()
         num_samples += preds.size(0)
-
+    print('socres size is {}, preds size is {}, y size is {}'.format(scores.size, preds.size, y.size))
     acc = float(num_correct) / num_samples
     print('Got %d / %d correct (%.2f)' % (num_correct, num_samples, 100 * acc))
 
 def train(loader_train, model, criterion, optimizer):
     model.train()
+    # test
+    iters = len(loader_train)
+    print('The number of iterations in each epoch is {}'.format(iters))
+    
     for t, (X, y) in enumerate(loader_train):
 
-        # test
-        print('The samples in each batch is {}'.format(len(loader_train)))
 
         X_var = Variable(X.type(gpu_dtype))
         y_var = Variable(y.type(gpu_dtype)).long()
