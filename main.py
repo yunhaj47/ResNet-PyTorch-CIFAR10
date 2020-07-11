@@ -14,8 +14,8 @@ from model import ResNet
 
 import numpy as np
 
-
-parser = argparse.ArgumentParser()
+# Training settings
+parser = argparse.ArgumentParser(description='PyTorch ResNet Example')
 parser.add_argument('--data-dir', default='./dataset', type=str,
                     help='path to dataset')
 parser.add_argument('--weight-decay', default=0.0001, type=float,
@@ -32,6 +32,7 @@ parser.add_argument('--res-option', default='A', type=str,
                     help='which projection method to use for changing number of channels in residual connections')
 
 def main(args):
+
     # define transforms for normalization and data augmentation
     transform_augment = T.Compose([
         T.RandomHorizontalFlip(),
@@ -40,6 +41,7 @@ def main(args):
         T.ToTensor(),
         T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
+
     # get CIFAR-10 data
     NUM_TRAIN = 45000
     NUM_VAL = 5000
@@ -58,6 +60,7 @@ def main(args):
     # load model
     model = ResNet(args.n, res_option=args.res_option, use_dropout=args.use_dropout)
     
+    # will call the get_param_count function below
     param_count = get_param_count(model)
     print('Parameter count: %d' % param_count)
     
@@ -80,23 +83,32 @@ def main(args):
         optimizer = optim.SGD(model.parameters(), lr=learning_rate,
                               momentum=0.9, weight_decay=args.weight_decay)
         for epoch in range(num_epochs):
+            
+            # compute the validation accuracy at the beginning of each epoch
             check_accuracy(model, loader_val)
             print('Starting epoch %d / %d' % (epoch+1, num_epochs))
+
+            # train the model
             train(loader_train, model, criterion, optimizer)
+        # after num_epochs epoches decrease the lr
         learning_rate *= 0.1
     
     print('Final test accuracy:')
     check_accuracy(model, loader_test)
 
 def check_accuracy(model, loader):
+
     num_correct = 0
     num_samples = 0
     model.eval()
+
     for X, y in loader:
         X_var = Variable(X.type(gpu_dtype), volatile=True)
 
         scores = model(X_var)
         _, preds = scores.data.cpu().max(1)
+        # test
+        print('socres size is {}, preds size is {}, y size is {}'.format(scores.size, preds.size, y.size))
 
         num_correct += (preds == y).sum()
         num_samples += preds.size(0)
@@ -107,17 +119,28 @@ def check_accuracy(model, loader):
 def train(loader_train, model, criterion, optimizer):
     model.train()
     for t, (X, y) in enumerate(loader_train):
+
+        # test
+        print('The samples in each batch is {}'.format(len(loader_train)))
+
         X_var = Variable(X.type(gpu_dtype))
         y_var = Variable(y.type(gpu_dtype)).long()
 
         scores = model(X_var)
-
-        loss = criterion(scores, y_var)
+        # criterion is the way we calculate the loss
+        loss = criterion(scores, y_var) 
         if (t+1) % args.print_every == 0:
-            print('t = %d, loss = %.4f' % (t+1, loss.data[0]))
-
+            # print('t = %d, loss = %.4f' % (t+1, loss.data[0]))
+            # is loss.data[0] a 0-dim tensor?
+            print('t = %d, loss = %.4f' % (t+1, loss.item()))
+        
+        # set the gradients to zero
         optimizer.zero_grad()
+        
+        # backward propagation: compute the grads
         loss.backward()
+        
+        # update the NN weights, the optimizer has been wrapped by horovod, so I believe allreduce is performed here 
         optimizer.step()
 
 def get_param_count(model):
@@ -126,8 +149,8 @@ def get_param_count(model):
 
 class ChunkSampler(sampler.Sampler):
     def __init__(self, num_samples, start=0):
-        self.num_samples = num_samples
-        self.start = start
+        self.num_samples = num_samples # num train 45000
+        self.start = start             # start 0
     
     def __iter__(self):
         return iter(range(self.start, self.start+self.num_samples))
