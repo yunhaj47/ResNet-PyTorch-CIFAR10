@@ -318,7 +318,7 @@ for num_epochs in SCHEDULE_EPOCHS:
         # train the model
         train(epoch)
         # try to put 
-        
+
     # after num_epochs epoches decrease the lr
     learning_rate *= 0.1
     acc_epochs += num_epochs
@@ -332,3 +332,4 @@ print('wand.run.dir is {}'.format(wandb.run.dir))
 
 torch.save(model.state_dict(), os.path.join(wandb.run.dir, 'model.pt'))
 wandb.save('model.pt')
+#end
