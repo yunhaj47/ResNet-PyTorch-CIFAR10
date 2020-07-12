@@ -287,6 +287,7 @@ def train(epoch):
 
 # train model
 SCHEDULE_EPOCHS = [50, 5, 5] # divide lr by 10 after each number of epochs
+acc_epochs = 0
 #     SCHEDULE_EPOCHS = [100, 50, 50] # divide lr by 10 after each number of epochs
 learning_rate = args.lr # initial learning rate, by default is 0.1
 
@@ -295,9 +296,11 @@ hvd.broadcast_parameters(model.state_dict(), root_rank=0)
 
 
 for num_epochs in SCHEDULE_EPOCHS:
+
     print('-' * 60)
     print('Training for %d epochs with learning rate %f' % (num_epochs, learning_rate))
     print('-' * 60)
+
     # Horovod: scale learning rate by the number of GPUs.
     optimizer = optim.SGD(model.parameters(), lr=learning_rate * hvd.size(),
                             momentum=0.9, weight_decay=args.weight_decay)
@@ -307,7 +310,7 @@ for num_epochs in SCHEDULE_EPOCHS:
     # Horovod: wrap optimizer with DistributedOptimizer.
     optimizer = hvd.DistributedOptimizer(optimizer, grc, named_parameters=model.named_parameters())
     
-    for epoch in range(num_epochs):
+    for epoch in range(acc_epochs, acc_epochs + num_epochs):
         
         # compute the validation accuracy at the beginning of each epoch
         check_accuracy('val')
@@ -315,8 +318,10 @@ for num_epochs in SCHEDULE_EPOCHS:
         # train the model
         train(epoch)
         # try to put 
+        
     # after num_epochs epoches decrease the lr
     learning_rate *= 0.1
+    acc_epochs += num_epochs
 
 
 print('Final test accuracy:')
