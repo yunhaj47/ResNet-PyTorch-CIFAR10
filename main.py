@@ -48,7 +48,7 @@ def main(args):
     cifar10_train = dset.CIFAR10('./dataset', train=True, download=True,
                                  transform=T.Compose([transform_augment, transform_normalize]))
     # test
-    print('The format of the cifar10_train is {}'.format(type(cifar10_train)))
+    print('The type of the cifar10_train is {}'.format(type(cifar10_train)))
     loader_train = DataLoader(cifar10_train, batch_size=args.batch_size,
                               sampler=ChunkSampler(NUM_TRAIN))
     cifar10_val = dset.CIFAR10('./dataset', train=True, download=True,
@@ -113,7 +113,8 @@ def check_accuracy(model, loader):
 
         num_correct += (preds == y).sum()
         num_samples += preds.size(0)
-    print('socres size is {}, preds size is {}, y size is {}'.format(list(scores.size()), list(preds.size()), list(y.size())))
+    # size is [8,10]
+    print('scores size is {}, preds size is {}, y size is {}'.format(list(scores.size()), list(preds.size()), list(y.size())))
     acc = float(num_correct) / num_samples
     print('Got %d / %d correct (%.2f)' % (num_correct, num_samples, 100 * acc))
 
