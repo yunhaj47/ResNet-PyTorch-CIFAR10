@@ -79,8 +79,10 @@ print('This is the rank {} device.'.format(hvd.rank()))
 # Set fields
 # Test: print the rank of each GPU (not the local rank, what is the difference? local rank will give something like an address)
 print('The compression ratio is {}.'.format(args.compression_ratio))
-compressor = 'topk'
-run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor + '-' + str(args.compression_ratio)
+# compressor = 'topk'
+compressor = 'baseline'
+run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor)
+# run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor + '-' + str(args.compression_ratio)
 
 # Initialize wandb
 wandb.init(project="project-csens", name=run_name)
@@ -178,7 +180,9 @@ if args.cuda:
     model.cuda()
       
 # GRACE: compression algorithm.
-params = {'compressor': 'topk', 'compress_ratio': args.compression_ratio, 'memory':'residual', 'communicator':'allgather', 'world_size':hvd.size()}
+
+# params = {'compressor': 'topk', 'compress_ratio': args.compression_ratio, 'memory':'residual', 'communicator':'allgather', 'world_size':hvd.size()}
+params = {}
 # grc = Allgather(TopKCompressor(config.compression_ratio), ResidualMemory(), hvd.size())
 grc = grace_from_params(params)
 
