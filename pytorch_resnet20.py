@@ -81,7 +81,7 @@ print('This is the rank {} device.'.format(hvd.rank()))
 print('The compression ratio is {}.'.format(args.compression_ratio))
 # compressor = 'topk'
 compressor = 'baseline'
-run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor)
+run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor
 # run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor + '-' + str(args.compression_ratio)
 
 # Initialize wandb
