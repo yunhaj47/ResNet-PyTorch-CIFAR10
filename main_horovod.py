@@ -78,7 +78,7 @@ print('This is the rank {} device.'.format(hvd.rank()))
 # Test: print the rank of each GPU (not the local rank, what is the difference? local rank will give something like an address)
 print('The compression ratio is {}.'.format(args.compression_ratio))
 compressor = 'topk'
-run_name = 'worker-' + str(hvd.rank()) + '-' + compressor + '-' + str(args.compression_ratio)
+run_name = 'ResNet-worker-' + str(hvd.rank()) + '-' + compressor + '-' + str(args.compression_ratio)
 
 # Initialize wandb
 wandb.init(project="project-csens", name=run_name)
@@ -139,7 +139,7 @@ val_list = list(range(NUM_TRAIN, NUM_TRAIN+NUM_VAL))
 val_dataset = torch.utils.data.Subset(train_dataset_origin, val_list)  
 # Horovod: use DistributedSampler to partition the val data.    
 val_sampler = torch.utils.data.distributed.DistributedSampler(
-    train_dataset, num_replicas=hvd.size(), rank=hvd.rank())
+    val_dataset, num_replicas=hvd.size(), rank=hvd.rank())
 val_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=args.batch_size, sampler=val_sampler, **kwargs)
 
@@ -189,7 +189,7 @@ def metric_average(val, name):
     tensor = torch.tensor(val)
     avg_tensor = hvd.allreduce(tensor, name=name)
     return avg_tensor.item()
-       
+
 
 def check_accuracy(mode):
     
