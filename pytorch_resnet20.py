@@ -1,20 +1,18 @@
 from __future__ import print_function # What's for
 
-# wandb
 import os
 import wandb
 import numpy as np
-
 import argparse
 
 import torch
-import torch.nn as nn
+# import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data.distributed
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, models
 
-from torch.autograd import Variable
+# from torch.autograd import Variable
 
 from torch.utils.data import DataLoader
 from torch.utils.data import sampler
@@ -180,7 +178,6 @@ if args.cuda:
     model.cuda()
       
 # GRACE: compression algorithm.
-
 # params = {'compressor': 'topk', 'compress_ratio': args.compression_ratio, 'memory':'residual', 'communicator':'allgather', 'world_size':hvd.size()}
 params = {}
 # grc = Allgather(TopKCompressor(config.compression_ratio), ResidualMemory(), hvd.size())
